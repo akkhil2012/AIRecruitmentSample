@@ -1,0 +1,55 @@
+[
+  {
+    "id": "A",
+    "years": 7,
+    "skills": [
+      "Java",
+      "Spring Boot",
+      "REST APIs",
+      "SQL",
+      "AWS",
+      "Docker"
+    ]
+  },
+  {
+    "id": "B",
+    "years": 6,
+    "skills": [
+      "Java",
+      "Spring Boot",
+      "REST APIs",
+      "SQL"
+    ]
+  },
+  {
+    "id": "C",
+    "years": 4,
+    "skills": [
+      "Java",
+      "Spring Boot",
+      "REST APIs",
+      "SQL",
+      "Kubernetes"
+    ]
+  },
+  {
+    "id": "D",
+    "years": 8,
+    "skills": [
+      "SQL",
+      "Docker",
+      "Kubernetes"
+    ]
+  },
+  {
+    "id": "E",
+    "years": 5,
+    "skills": [
+      "Java",
+      "Spring Boot",
+      "REST APIs",
+      "SQL",
+      "AWS"
+    ]
+  }
+]

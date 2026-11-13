@@ -1,0 +1,23 @@
+{
+  "company": "ABC Technologies",
+  "title": "Senior Java Developer",
+  "location": "Hyderabad",
+  "openings": 2,
+  "minimum_years": 5,
+  "required_skills": [
+    "Java",
+    "Spring Boot",
+    "REST APIs",
+    "SQL"
+  ],
+  "preferred_skills": [
+    "AWS",
+    "Docker",
+    "Kubernetes"
+  ],
+  "other_requirements": [
+    "Production application experience",
+    "Problem-solving",
+    "Communication"
+  ]
+}
