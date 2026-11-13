@@ -4,6 +4,10 @@
 
 Install Python 3.10+, clone the repository and run both commands in the README. Open the AI prompts and an approved AI assistant. Keep the templates as offline fallbacks. No package installation or API key is needed for Python. Run commands from the repository root.
 
+## Optional Streamlit walkthrough
+
+Install `requirements.txt` and run `python -m streamlit run app.py` before the workshop. Open http://localhost:8501. Follow the seven tabs in agenda order. At minutes 22–35, switch sidebar presets to show C overtaking B, then inspect C's experience follow-up. Try custom weights that do not total 100 to show score validation. Download the comparison CSV if useful. Open AI prompts from the Workshop guide tab. The UI does not call an AI service.
+
 ## Schedule
 
 | Minutes | Slides | Live demonstration and audience activity |
