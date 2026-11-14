@@ -1,44 +1,55 @@
-"""Optional UI checks: install requirements.txt to enable these tests."""
+"""UI checks mock only the network boundary; no paid API calls."""
 import importlib.util
+import io
+import json
 from pathlib import Path
 import unittest
+from unittest.mock import patch
 
 HAS_STREAMLIT = importlib.util.find_spec('streamlit') is not None
 
-@unittest.skipUnless(HAS_STREAMLIT, 'Install requirements.txt to run Streamlit UI tests')
+@unittest.skipUnless(HAS_STREAMLIT, 'Install requirements.txt to run UI tests')
 class UITests(unittest.TestCase):
     def setUp(self):
         from streamlit.testing.v1 import AppTest
+        self.env = patch.dict('os.environ', {'OPENROUTER_API_KEY': '', 'OPENROUTER_MODEL': 'test/model'})
+        self.env.start()
+        self.addCleanup(self.env.stop)
+        self.network = patch('urllib.request.urlopen')
+        self.request = self.network.start()
+        self.addCleanup(self.network.stop)
         self.app = AppTest.from_file(str(Path(__file__).resolve().parents[1] / 'app.py')).run(timeout=20)
 
-    def test_initial_render_and_baseline(self):
+    def test_no_api_call_on_initial_render_or_edit(self):
         self.assertFalse(self.app.exception)
         self.assertEqual(len(self.app.tabs), 7)
-        self.assertEqual(list(self.app.dataframe[1].value['Score / 100']), [97,93,90,89,44])
+        self.app.text_area(key='instructions_comparison').set_value('Focus on Java').run()
+        self.request.assert_not_called()
 
-    def test_preset_changes_scores(self):
-        self.app.radio[0].set_value('Preferred skills · 55 / 10 / 35').run()
+    def test_missing_key_has_actionable_error(self):
+        self.app.button(key='generate_comparison').click().run()
         self.assertFalse(self.app.exception)
-        self.assertEqual(list(self.app.dataframe[1].value['Candidate']), ['A','E','C','B','D'])
-        self.assertEqual(list(self.app.dataframe[1].value['Score / 100']), [88,77,75,65,47])
+        self.assertIn('OPENROUTER_API_KEY', self.app.error[0].value)
+        self.request.assert_not_called()
 
-    def test_custom_invalid_total_hides_scores_then_recovers(self):
-        self.app.radio[0].set_value('Custom').run()
-        self.app.slider[0].set_value(60).run()
+    def test_generation_edit_persistence_and_error_removes_old_answer(self):
+        self.app.text_input[0].set_value('test-key').run()
+        self.request.return_value = io.BytesIO(json.dumps({
+            'choices': [{'message': {'content': 'LLM generated comparison'}}],
+            'model': 'test/model', 'usage': {'total_tokens': 20},
+        }).encode())
+        self.app.button(key='generate_comparison').click().run()
+        self.assertFalse(self.app.exception)
+        self.assertEqual(self.request.call_count, 1)
+        self.app.text_area(key='editor_comparison').set_value('Edited evidence').run()
+        self.assertEqual(self.request.call_count, 1)
+        self.assertEqual(self.app.text_area(key='editor_comparison').value, 'Edited evidence')
+        from urllib.error import URLError
+        self.request.side_effect = URLError('offline')
+        self.app.button(key='generate_comparison').click().run()
         self.assertFalse(self.app.exception)
         self.assertTrue(self.app.error)
-        self.assertEqual(len(self.app.dataframe), 1)
-        self.app.slider[2].set_value(20).run()
-        self.assertFalse(self.app.exception)
-        self.assertFalse(self.app.error)
-        self.assertEqual(len(self.app.dataframe), 2)
-
-    def test_candidate_followup(self):
-        self.app.selectbox[0].set_value('D').run()
-        self.assertFalse(self.app.exception)
-        text = '\n'.join(item.value for item in self.app.markdown)
-        self.assertIn('using Java?', text)
-        self.assertIn('using Spring Boot?', text)
+        self.assertNotIn('editor_comparison', [x.key for x in self.app.text_area])
 
 if __name__ == '__main__':
     unittest.main()

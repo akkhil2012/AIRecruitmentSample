@@ -1,82 +1,80 @@
-# Recruiter Copilot — AI Recruitment Sample
+# Recruiter Copilot — OpenRouter LLM edition
 
-A simple 60-minute workshop based on *AI & Machine Learning for Recruiters*: ABC Technologies is hiring two Senior Java Developers in Hyderabad.
+`RecuiterDemoLLM` is the LLM-backed edition of `RecuiterDemoFirst`. It retains the seven-tab Streamlit workshop and fictional JSON evidence, replacing weighted scoring and static recruitment answers with real OpenRouter chat-completion requests. The original branch is unchanged.
 
-## Quick start
+## Run locally
 
-Python 3.10+; no packages or API keys needed.
+Python 3.10+:
 
 ```bash
-git clone https://github.com/akkhil2012/AIRecruitmentSample.git
+git clone --branch RecuiterDemoLLM https://github.com/akkhil2012/AIRecruitmentSample.git
 cd AIRecruitmentSample
-python recruiter_demo.py
-python recruiter_demo.py --weights 55 10 35
-python -m unittest discover -s tests -v
-```
-
-Use `python3` or Windows `py` if needed.
-
-## Streamlit interface
-
-Install the UI dependency and launch locally:
-
-```bash
 python -m venv .venv
-# macOS/Linux:
+# macOS/Linux
 source .venv/bin/activate
-# Windows PowerShell instead: .venv\Scripts\Activate.ps1
+# Windows PowerShell: .venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
+export OPENROUTER_API_KEY='your-openrouter-key'
+export OPENROUTER_MODEL='openai/gpt-4o-mini'
+# PowerShell: $env:OPENROUTER_API_KEY='your-openrouter-key'
+# PowerShell: $env:OPENROUTER_MODEL='openai/gpt-4o-mini'
 python -m streamlit run app.py
 ```
 
-Open http://localhost:8501. Use the sidebar to choose baseline, preferred-skills or custom weights. Custom weights must total 100 before scores are displayed.
+Open http://localhost:8501. Alternatively enter your API key in the password field and your model ID in the sidebar. Streamlit deployment secrets are also supported:
 
-In the Sourcing tab, edit the Boolean query in the multiline editor, preview it, and download it as a text file. Edits stay in the current session and survive changes to the workshop controls. Download a copy to keep it after the session ends.
+```toml
+# .streamlit/secrets.toml (never commit this file)
+OPENROUTER_API_KEY = "your-openrouter-key"
+OPENROUTER_MODEL = "openai/gpt-4o-mini"
+```
 
-Seven tabs cover the role brief, Boolean search, candidate comparison, interview, communication, joining/exit plans and workshop guide. Compare scores, inspect evidence gaps, download a CSV, and open the AI prompts. All profiles are fictional. The UI calls no AI service and requires no API key. The CLI still works without installing Streamlit.
+Use an available OpenRouter `provider/model` ID with text chat-completion support. Model availability, pricing and provider capabilities depend on your account. The default is configurable, not a guarantee of access. `.env` files are not automatically loaded; export environment variables or use Streamlit secrets.
 
-Run all checks after installation with `python -m unittest discover -s tests -v`. Without Streamlit, UI tests are skipped and CLI tests still run.
+## What each tab generates
 
-## What the demo covers
+| Tab | LLM output |
+|---|---|
+| Role brief | Explanation of role criteria and verification needs |
+| Sourcing | Boolean search query and explanation, editable after generation |
+| Candidate comparison | Listed-evidence table and follow-up questions; no scores or rankings |
+| Interview | Structured plan, questions and assessment rubric |
+| Communication | Invitation and evidence-summary drafts with unknowns left as placeholders |
+| Joining & exit | Planning checklists and approval responsibilities |
+| Workshop guide | A novice-friendly 60-minute guide |
 
-1. Role checklist and Boolean sourcing query.
-2. Five fictional profiles and transparent weighted checklist scores.
-3. Structured interview questions and a 1–5 rubric.
-4. A draft screening invitation and interview-evidence summary.
-5. Joining and exit plans with human approval.
+Click **Generate** in a tab to make one API request. Responses are editable, previewable and downloadable as Markdown. Session state retains drafts while you use the app; download them before closing the session. Changing connection settings does not regenerate existing drafts; the caption retains the actual response model. Regeneration replaces that tab's draft. Clear generated drafts removes all outputs from the session.
 
-The Python component is **rule-based scoring and static templates**, not a trained ML model or an LLM. Use the separate prompts in an approved AI assistant for generative AI activities. Semantic search is discussed, not implemented. No outreach, offers or access changes are executed.
+The source-evidence panel shows exactly which role and profiles are included. Update `data/role.json` and `data/candidates.json` and restart the app to change the evidence.
 
-## Workshop materials
+## API behavior
 
-- [60-minute presenter guide](docs/walkthrough.md)
-- [Generative AI activity prompts](prompts/workshop.md)
-- [Expected results and scoring formula](docs/expected-results.md)
-- [Interview plan](templates/interview.md)
-- [Communications](templates/communication.md)
-- [Joining and exit checklist](templates/checklists.md)
-- [Fictional candidates](data/candidates.json) and [role](data/role.json)
+`recruiter_demo.py` calls `POST https://openrouter.ai/api/v1/chat/completions` with Bearer authentication, a system instruction, task instructions, source JSON, the selected model, temperature 0.2, a 3,000-token output limit and a 90-second timeout. It returns provider text, model metadata and token usage. There are no automatic retries or rule-based answer fallbacks. Authentication, credits, rate limits, connection errors, empty/invalid responses and truncated output produce actionable errors without exposing keys or raw provider error bodies.
 
-## Scoring
+The CLI uses the same client and prompts, with only Python's standard library:
 
-`--weights` takes required-skills, experience and preferred-skills weights. Defaults: 70/20/10. Values must be nonnegative and total 100. Years coverage is capped at five; four years receive partial coverage. Missing skills receive no coverage points but remain follow-up items.
+```bash
+python recruiter_demo.py --task comparison
+python recruiter_demo.py --task sourcing --instructions 'Focus on Agentic AI roles'
+python recruiter_demo.py --task interview --model openai/gpt-4o-mini
+```
 
-| Candidate | 70/20/10 | 55/10/35 |
-|---|---|---|
-| A | 97 | 88 |
-| B | 90 | 65 |
-| C | 89 | 75 |
-| D | 44 | 47 |
-| E | 93 | 77 |
+For another role, update the source JSON rather than only adding instructions. Supported tasks: `role`, `sourcing`, `comparison`, `interview`, `communication`, `checklists`, `workshop`. The former `--weights` option and `screen()` scoring function have been removed.
 
-## Extend it
+## Evidence and human review
 
-Edit the JSON files to explore evidence and scoring. Use nonempty required/preferred skill lists, a positive minimum experience and nonnegative candidate years. The printed brief, query and templates are specific to the Java scenario; update them for another role.
+The LLM is instructed to use listed evidence, label missing details **not listed**, keep total years separate from verified relevant years, and avoid inferring location, production experience or communication ability. It must not score, rank, select or reject candidates. These are model instructions, not guarantees: users must verify generated text against the source evidence. Profile text is treated as data, but prompt-injection resistance is not guaranteed.
 
-Possible next steps: an approved LLM drafting adapter, embedding-based search, or an authenticated ATS connection. Keep permission checks in application code and require appropriate approvals before writes.
+Generate transmits the role, profiles and additional instructions to OpenRouter and its selected provider and may incur charges. Use the supplied fictional profiles for workshops. Keys are used server-side and are not included in downloads. Do not commit credentials or use sensitive candidate information without appropriate authorization.
 
-## Responsible use
+The app does not search LinkedIn or other candidate platforms, send messages, make offers or change access. The user manually runs sourcing queries elsewhere. This is an LLM drafting application, not an autonomous sourcing agent.
 
-Scores measure checklist coverage, not job performance or eligibility. Missing information means **not listed**, not absent. Verify whether years are relevant and check production experience, problem-solving, communication and location separately. Exclude protected traits from ranking. Use fictional data in public workshops. Qualified people own selection, rejection, outreach, offers and compliance.
+## Verification
 
-The original presentation is not redistributed in this public repository.
+```bash
+python -m unittest discover -s tests -v
+```
+
+Tests mock the HTTP boundary: they verify request format, all task paths, errors, CLI behavior, UI generation, editing and persistence without paid calls. UI tests require `requirements.txt`; they are skipped if Streamlit is absent. A live smoke test requires your own configured key and credits: run `python recruiter_demo.py --task comparison` and check the returned evidence against the JSON.
+
+Files in `templates/` and `prompts/workshop.md` are inherited workshop reference materials. They are not used as generated answers or as a fallback in this branch.

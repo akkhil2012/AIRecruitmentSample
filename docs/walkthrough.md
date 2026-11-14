@@ -1,44 +1,10 @@
-# 60-minute presenter guide
+# OpenRouter workshop walkthrough
 
-## Preparation
+1. **0–10 minutes:** Explain the fictional role, source-evidence panel, API key and selected model. Explain that Generate sends this information to OpenRouter and its provider.
+2. **10–20 minutes:** Generate the role brief and Boolean sourcing query. Edit the query and download it. Explain that a person runs it on an authorized platform; the app does not search.
+3. **20–35 minutes:** Generate the candidate comparison. Check every claim against the JSON. Discuss why listed years do not establish relevant years and missing information means "not listed".
+4. **35–45 minutes:** Generate the interview plan and evidence probes. Discuss consistent questions and human assessment.
+5. **45–55 minutes:** Generate communication drafts and joining/exit checklists. Verify placeholders and approval responsibilities. Nothing is sent or executed.
+6. **55–60 minutes:** Download an edited draft, inspect token usage, and discuss model uncertainty and usage costs.
 
-Install Python 3.10+, clone the repository and run both commands in the README. Open the AI prompts and an approved AI assistant. Keep the templates as offline fallbacks. No package installation or API key is needed for Python. Run commands from the repository root.
-
-## Optional Streamlit walkthrough
-
-Install `requirements.txt` and run `python -m streamlit run app.py` before the workshop. Open http://localhost:8501. Follow the seven tabs in agenda order. At minutes 22–35, switch sidebar presets to show C overtaking B, then inspect C's experience follow-up. Try custom weights that do not total 100 to show score validation. Download the comparison CSV if useful. Open AI prompts from the Workshop guide tab. The UI does not call an AI service.
-
-## Schedule
-
-| Minutes | Slides | Live demonstration and audience activity |
-|---|---|---|
-| 0–5 | 1–4 | Ask how many resumes participants review. Explain AI, ML and generative AI. Compare an exact title search with finding Java API experience by meaning. The project does not implement semantic search. |
-| 5–12 | 5–7 | Show the role checklist in the Python output. Paste prompt 1. Ask whether AI added an unsupported degree or certification. Approve the checklist together. |
-| 12–22 | 8–9 | Show the Boolean query. Explain AND and OR. Ask for alternative titles. Apply Hyderabad separately in an authorized platform; verify supported syntax and REST API evidence. No external search is executed here. |
-| 22–35 | 10–14 | Open data/candidates.json. Paste prompt 2 and verify extracted facts. Run baseline and alternative weights. Ask why C overtakes B, and whether that removes the experience follow-up. |
-| 35–43 | 15–16 | Paste prompt 3. Compare with templates/interview.md. Ask a volunteer one question, record evidence and apply the rubric. |
-| 43–50 | 17–18 | Paste prompt 4. Check placeholders and screening stage. Discuss why skipped SQL means not assessed. Recruiter approval precedes sending. |
-| 50–56 | 19–20 | Paste prompt 5. Assign HR, manager and IT owners. Separate planning from authorized execution. |
-| 56–60 | 21–22 | Review fairness, privacy, accuracy and human oversight. Ask each participant for one repetitive task they could improve. |
-
-## Live commands
-
-```bash
-python recruiter_demo.py
-python recruiter_demo.py --weights 55 10 35
-```
-
-Walk through the numbered output sections as each agenda topic arrives. The workshop's interview segment demonstrates the 20-minute interview plan; it does not conduct a full interview.
-
-## Closing questions
-
-- Did the assistant invent requirements?
-- Did anyone confuse not listed with absent?
-- Why did changing weights change the order?
-- Who owns selection, rejection, outreach, offers and access changes?
-
-Do not use age, gender, religion, caste, disability or other protected traits for ranking. Use fictional profiles. Weighted checklist coverage is not a validated hiring assessment or performance prediction.
-
-## Troubleshooting
-
-Use python3 or Windows py if python is unavailable. If the AI service is unavailable, use the templates and expected-results document. AI outputs vary; compare them with source facts. No external service is needed for the Python demo.
+Each tab calls the LLM only on Generate. There is no numerical scoring engine or static-answer fallback. Missing keys, API errors and unusable responses show errors. Use README setup instructions; never put a real key in committed files.
