@@ -31,6 +31,8 @@ python -m streamlit run app.py
 
 Open http://localhost:8501. Use the sidebar to choose baseline, preferred-skills or custom weights. Custom weights must total 100 before scores are displayed.
 
+In the Sourcing tab, edit the Boolean query in the multiline editor, preview it, and download it as a text file. Edits stay in the current session and survive changes to the workshop controls. Download a copy to keep it after the session ends.
+
 Seven tabs cover the role brief, Boolean search, candidate comparison, interview, communication, joining/exit plans and workshop guide. Compare scores, inspect evidence gaps, download a CSV, and open the AI prompts. All profiles are fictional. The UI calls no AI service and requires no API key. The CLI still works without installing Streamlit.
 
 Run all checks after installation with `python -m unittest discover -s tests -v`. Without Streamlit, UI tests are skipped and CLI tests still run.

@@ -52,7 +52,20 @@ with brief:
 
 with sourcing:
     st.header('Boolean sourcing query')
-    st.code('("Java Developer" OR "Backend Engineer" OR "Software Engineer")\nAND ("Spring Boot" OR SpringBoot)\nAND ("REST API" OR Microservices)\nAND (SQL OR PostgreSQL)', language='text')
+    sourcing_query = st.text_area(
+        'Edit Boolean sourcing query',
+        value='("Java Developer" OR "Backend Engineer" OR "Software Engineer")\nAND ("Spring Boot" OR SpringBoot)\nAND ("REST API" OR Microservices)\nAND (SQL OR PostgreSQL)',
+        height=180,
+        key='sourcing_query',
+        help='Edit the query for your sourcing platform. Changes stay in this session.',
+    )
+    st.caption('Edits stay in this session. Download the query to keep a copy.')
+    if sourcing_query.strip():
+        st.code(sourcing_query, language='text')
+    st.download_button(
+        'Download Boolean query', sourcing_query, 'boolean_sourcing_query.txt',
+        'text/plain', disabled=not sourcing_query.strip(),
+    )
     st.write('OR broadens a group; AND requires each group. Apply Hyderabad separately and check the search syntax in your authorized platform.')
     st.warning('A microservices mention alone does not establish REST API experience. Verify the evidence.')
 
