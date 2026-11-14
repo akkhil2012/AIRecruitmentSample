@@ -51,5 +51,34 @@ class UITests(unittest.TestCase):
         self.assertTrue(self.app.error)
         self.assertNotIn('editor_comparison', [x.key for x in self.app.text_area])
 
+    def test_dynamic_sources_reach_api_and_changes_clear_drafts(self):
+        self.app.text_input[0].set_value('test-key').run()
+        self.app.text_area(key='source_role').set_value('{"title":"Agent Engineer"}').run()
+        self.app.text_area(key='source_candidates').set_value('[{"id":"Z","project":"Agent tools"}]').run()
+        self.request.return_value = io.BytesIO(json.dumps({
+            'choices': [{'message': {'content': 'New evidence'}}], 'model': 'test/model'
+        }).encode())
+        self.app.button(key='generate_comparison').click().run()
+        self.assertFalse(self.app.exception)
+        body = json.loads(self.request.call_args.args[0].data)
+        text = body['messages'][1]['content']
+        self.assertIn('Agent Engineer', text)
+        self.assertIn('Agent tools', text)
+        self.assertNotIn('Senior Java Developer', text)
+        self.app.text_area(key='source_candidates').set_value('[]').run()
+        self.assertNotIn('editor_comparison', [x.key for x in self.app.text_area])
+        self.assertEqual(self.request.call_count, 1)
+
+    def test_invalid_sources_block_generation_and_reset_restores_sample(self):
+        self.app.text_area(key='source_role').set_value('invalid').run()
+        self.assertFalse(self.app.exception)
+        self.assertTrue(self.app.button(key='generate_comparison').disabled)
+        self.request.assert_not_called()
+        self.app.button(key='reset_evidence').click().run()
+        self.assertFalse(self.app.exception)
+        self.assertFalse(self.app.button(key='generate_comparison').disabled)
+        self.assertEqual(json.loads(self.app.text_area(key='source_role').value)['title'], 'Senior Java Developer')
+        self.request.assert_not_called()
+
 if __name__ == '__main__':
     unittest.main()

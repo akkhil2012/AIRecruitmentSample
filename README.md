@@ -45,7 +45,7 @@ Use an available OpenRouter `provider/model` ID with text chat-completion suppor
 
 Click **Generate** in a tab to make one API request. Responses are editable, previewable and downloadable as Markdown. Session state retains drafts while you use the app; download them before closing the session. Changing connection settings does not regenerate existing drafts; the caption retains the actual response model. Regeneration replaces that tab's draft. Clear generated drafts removes all outputs from the session.
 
-The source-evidence panel shows exactly which role and profiles are included. Update `data/role.json` and `data/candidates.json` and restart the app to change the evidence.
+The expanded **Source evidence supplied to the LLM** panel accepts editable role and candidate JSON. Every Generate button uses the current valid input, without changing repository files or restarting. Role needs a nonempty `title`; candidates need unique string `id` values. Optional `skills` are lists of strings and `years` must be finite nonnegative numbers. Omit unknown facts and add project descriptions as extra fields. Use `[]` for role-only tasks. Invalid input disables all Generate buttons. Changing either source clears old generated drafts to prevent stale comparisons. Download the source JSON to keep a copy, or restore the fictional sample with the reset button. Session inputs are not saved to disk. The JSON files in `data/` remain the initial defaults.
 
 ## API behavior
 
@@ -59,7 +59,7 @@ python recruiter_demo.py --task sourcing --instructions 'Focus on Agentic AI rol
 python recruiter_demo.py --task interview --model openai/gpt-4o-mini
 ```
 
-For another role, update the source JSON rather than only adding instructions. Supported tasks: `role`, `sourcing`, `comparison`, `interview`, `communication`, `checklists`, `workshop`. The former `--weights` option and `screen()` scoring function have been removed.
+For another role, edit the source-evidence inputs in the app rather than only adding instructions. The CLI continues to use the JSON files in `data/`. Supported tasks: `role`, `sourcing`, `comparison`, `interview`, `communication`, `checklists`, `workshop`. The former `--weights` option and `screen()` scoring function have been removed.
 
 ## Evidence and human review
 
